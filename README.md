@@ -104,6 +104,7 @@ For comprehensive technical design, configurations, and developer guides, explor
 > **Planned Platform Enhancements (from [`TODOS.md`](file:///C:/Users/alias/repos/python-kafka-s3-event-pipeline/TODOS.md)):**
 > - **Change Data Capture (CDC):** Add PostgreSQL service + Debezium Source Connector to stream binlog database mutations to S3.
 > - **Medallion Architecture:** Expand from Bronze JSON landing into Silver and Gold analytical layers with DuckDB / dbt.
+> - **Kubernetes & Strimzi:** Deploy FastAPI Producer via K8s manifests (Deployments/HPA) and manage Kafka declaratively using the Strimzi Operator.
 > - **Secrets Management:** Integrate HashiCorp Vault service for container secret resolution.
 > - **Connector UI:** Add specialized management UI for interactive Kafka Connector management.
 

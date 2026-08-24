@@ -13,6 +13,7 @@ This document tracks planned architecture enhancements, technical debt, and road
     - `core/`: Kafka Producer client singleton, settings, and lifecycle managers.
     - `schemas/`: Pydantic models for webhook request payloads, JSON envelopes, and API responses.
     - `services/`: Business logic for mock event generation and background async workers.
+  - [x] **Automated Testing & CI:** Pytest unit/API route test suite with GitHub Actions workflow.
   - [x] **Target Directory Layout:**
     ```text
     producer/app/
@@ -84,3 +85,15 @@ This document tracks planned architecture enhancements, technical debt, and road
   - [ ] Add a HashiCorp Vault container service (or Doppler) for dynamic container credential resolution and secret rotation.
 - [ ] **Cloud Provisioning & IaC (Terraform)**
   - [ ] Create Terraform manifests to provision AWS MSK (Managed Kafka), AWS S3, and ECS/EKS clusters.
+
+---
+
+## 📌 Phase 6: Kubernetes Deployment & Cloud-Native Orchestration (K8s)
+
+- [ ] **FastAPI Producer Kubernetes Manifests**
+  - [ ] Create Kubernetes declarative manifests (`k8s/producer/`) with `Deployment`, `Service` (ClusterIP/NodePort), `ConfigMap`, and `HorizontalPodAutoscaler` (HPA) for auto-scaling HTTP ingestion based on CPU/traffic.
+  - [ ] Add `k8s/producer/secret.yaml` or integrate external secrets operator for secure credential mounting.
+- [ ] **Cloud-Native Kafka Operator (Strimzi)**
+  - [ ] Research and test deploying Kafka on Kubernetes using the **Strimzi Kafka Operator** (`Kafka`, `KafkaTopic`, and `KafkaConnect` Custom Resource Definitions).
+  - [ ] Define declarative `KafkaNodePool` and `KafkaConnect` resources to replace manual Docker Compose connector scripts with native Kubernetes CRDs.
+  - [ ] Configure `PersistentVolumeClaims` (PVCs) for stateful Kafka partition log storage.
