@@ -1,0 +1,30 @@
+[project]
+name = "python-kafka-s3-event-pipeline"
+version = "1.0.0"
+description = "Real-time event streaming and ingestion platform leveraging Apache Kafka (KRaft), FastAPI, and MinIO S3 Lake."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "confluent-kafka==2.15.0",
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "faker>=24.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["producer/tests"]
+pythonpath = ["producer"]
+asyncio_mode = "auto"
+addopts = "-p no:cacheprovider"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

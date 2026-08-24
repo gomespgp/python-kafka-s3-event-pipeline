@@ -13,14 +13,12 @@ htmlcov/
 venv/
 ENV/
 
-# Environment files with sensitive credentials
-.docker/**/.env
-.docker/.env
+# Environment files
 .env
 .env.*
 !.env.example
 
-# IDE & Editor files
+# IDE / Editor files
 .vscode/
 .idea/
 *.swp

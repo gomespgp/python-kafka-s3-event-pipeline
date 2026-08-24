@@ -92,7 +92,7 @@ services:
       kafka-connect:
         condition: service_healthy
 
-  producer:
+  event-producer:
     build:
       context: ..
       dockerfile: .docker/producer/Dockerfile
@@ -101,6 +101,9 @@ services:
       - "8000:8000"
     env_file:
       - ./producer/.env
+    volumes:
+      - ../producer/app:/app/app
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       kafka:
         condition: service_healthy
