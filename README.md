@@ -7,10 +7,11 @@ An end-to-end real-time event streaming and ingestion platform leveraging Apache
 ## 📌 Features
 
 - **Real-Time Streaming:** High-throughput event ingestion using Confluent Apache Kafka in ZooKeeper-less KRaft mode.
-- **FastAPI Producer & Simulator:** Webhook ingestion API and asynchronous background event simulator generating realistic CRM events (`contacts`, `leads`, `deals`, `engagements`).
+- **Modular FastAPI Producer & Simulator:** Layered application architecture with versioned API endpoints, dependency injection, Pydantic data schemas, and background simulation workers.
 - **Automated S3 Sink Connector:** Confluent Kafka Connect S3 Sink automatically registered on startup via a lightweight container sidecar.
 - **Time-Based Partitioning:** Dynamic object storage directory layout in MinIO (`kafka-s3-events-sink/crm-<type>/year=YYYY/month=MM/day=DD/hour=HH/`).
 - **Visual Monitoring:** Integrated Apache Kafka UI dashboard to inspect brokers, topics, consumer groups, and active connector status.
+- **Automated Testing & CI:** Pytest unit/API test suite with GitHub Actions CI pipeline running on every pull request to `master`.
 
 ---
 
@@ -42,31 +43,25 @@ docker compose -f .docker/docker-compose.yaml up -d --build
 
 ---
 
-## 💻 Local Development & Event Producer
+## 💻 Quick cURL Triggers
 
-The event producer is written in Python 3.10 using `FastAPI` and `confluent-kafka`. It runs inside Docker but supports local execution and API triggering.
-
-### 1. Trigger Event Generator via API
-
-Start generating simulated CRM events (batches of 15–30 events pushed every 3 seconds):
+### 1. Trigger Background Event Generator
 
 ```bash
-# Start background simulation
-curl -X POST "http://localhost:8000/simulation/start?interval_seconds=3"
+# Start background simulation (15–30 events every 3s)
+curl -X POST "http://localhost:8000/api/v1/simulation/start?interval_seconds=3"
 
 # Check simulation status
-curl -X GET "http://localhost:8000/simulation/status"
+curl -X GET "http://localhost:8000/api/v1/simulation/status"
 
-# Stop background simulation
-curl -X POST "http://localhost:8000/simulation/stop"
+# Stop simulation
+curl -X POST "http://localhost:8000/api/v1/simulation/stop"
 ```
 
-### 2. Ingest Manual Webhooks
-
-Send custom webhooks to target topics (`crm-contacts`, `crm-leads`, `crm-deals`, `crm-engagements`):
+### 2. Ingest Manual Webhook
 
 ```bash
-curl -X POST "http://localhost:8000/webhooks/crm/contacts" \
+curl -X POST "http://localhost:8000/api/v1/webhooks/crm/contacts" \
   -H "Content-Type: application/json" \
   -d '{
     "event_type": "contact.created",
@@ -80,27 +75,26 @@ curl -X POST "http://localhost:8000/webhooks/crm/contacts" \
   }'
 ```
 
+### 3. Run Automated Tests
+
+```bash
+# Run unit and API tests
+make test
+```
+
 ---
 
-## 📡 Kafka Connect & MinIO Storage Layout
+## 📚 Documentation Knowledge Base
 
-Kafka Connect automatically registers the `s3-sink-crm` connector on container initialization (`.docker/kafka-connect/init-connectors.sh`).
+For comprehensive technical design, configurations, and developer guides, explore the [`docs/`](docs/README.md) directory:
 
-### Connector Properties (`s3-sink-crm.json`)
-- **Topic Pattern:** Matches all topics beginning with `crm-.*`
-- **Target Bucket:** `kafka-s3-events-sink`
-- **Format:** JSON (`JsonFormat`)
-- **Partitioner:** `TimeBasedPartitioner` (Hourly partitions in UTC)
-- **Flush Threshold:** 15 records or 60,000 ms (1 minute)
-
-### S3 Directory Structure
-```text
-s3://kafka-s3-events-sink/
-├── crm-contacts/year=2026/month=08/day=23/hour=23/crm-contacts+0+0000000000.json
-├── crm-leads/year=2026/month=08/day=23/hour=23/crm-leads+0+0000000000.json
-├── crm-deals/year=2026/month=08/day=23/hour=23/crm-deals+0+0000000000.json
-└── crm-engagements/year=2026/month=08/day=23/hour=23/crm-engagements+0+0000000000.json
-```
+- 🏛️ **[System Architecture Overview](docs/architecture/overview.md)** — Topology diagrams and service interaction flows.
+- ⚙️ **[Kafka Broker & Connect Mechanics](docs/architecture/kafka-broker-connect.md)** — KRaft consensus, delivery guarantees, and S3 Sink buffering.
+- 🔄 **[Data Lifecycle & Partitioning](docs/architecture/data-lifecycle.md)** — Event schemas, payload envelopes, and S3 directory layouts.
+- 📋 **[Configuration Reference](docs/reference/configuration.md)** — Detailed breakdown of `.env` variables and connector JSON.
+- 🌐 **[API Reference](docs/reference/api-endpoints.md)** — Complete OpenAPI/cURL specification for all endpoints.
+- 🛠️ **[Local Development Guide](docs/guides/local-development.md)** — Makefile commands and local workflow.
+- 🩺 **[Troubleshooting Guide](docs/guides/troubleshooting.md)** — Common connector, broker, and MinIO fixes.
 
 ---
 
@@ -109,6 +103,7 @@ s3://kafka-s3-events-sink/
 > [!IMPORTANT]
 > **Planned Platform Enhancements (from [`TODOS.md`](file:///C:/Users/alias/repos/python-kafka-s3-event-pipeline/TODOS.md)):**
 > - **Change Data Capture (CDC):** Add PostgreSQL service + Debezium Source Connector to stream binlog database mutations to S3.
+> - **Medallion Architecture:** Expand from Bronze JSON landing into Silver and Gold analytical layers with DuckDB / dbt.
 > - **Secrets Management:** Integrate HashiCorp Vault service for container secret resolution.
 > - **Connector UI:** Add specialized management UI for interactive Kafka Connector management.
 
@@ -124,18 +119,50 @@ python-kafka-s3-event-pipeline/
 │   ├── kafka/                                 # KRaft Kafka broker environment configuration
 │   ├── kafka-connect/                         # Custom Dockerfile & connector auto-registration script
 │   ├── kafka-ui/                              # Kafka UI environment configuration
-│   └── producer/                              # Python producer Dockerfile & requirements
+│   └── producer/                              # Python producer Dockerfile & requirements.txt
+├── .github/
+│   └── workflows/
+│       └── producer-test.yaml                 # GitHub Actions CI workflow (triggers on PRs to master)
+├── docs/                                      # Modular documentation knowledge base
+│   ├── README.md                              # Documentation Hub & Sitemap
+│   ├── architecture/                          # Architecture flowcharts & deep dives
+│   │   ├── overview.md
+│   │   ├── kafka-broker-connect.md
+│   │   └── data-lifecycle.md
+│   ├── reference/                             # Reference manuals
+│   │   ├── configuration.md
+│   │   └── api-endpoints.md
+│   └── guides/                                # Practical developer guides
+│       ├── local-development.md
+│       └── troubleshooting.md
 ├── kafka-connect/
 │   └── connectors/
 │       └── s3-sink-crm.json                   # S3 Sink connector JSON specification
 ├── producer/
-│   └── app/
-│       ├── main.py                            # FastAPI application entrypoint & webhook routes
-│       ├── generator.py                       # Async background event generator worker
-│       ├── kafka_client.py                    # Wrapper for confluent-kafka Producer
-│       └── mock_data.py                       # Event schema envelope & Faker data generators
-├── ARCHITECTURE.md                            # Detailed technical architecture & data lifecycle
+│   ├── app/
+│   │   ├── main.py                            # FastAPI application factory & lifespan context
+│   │   ├── api/                               # HTTP layer & APIRouter endpoints
+│   │   │   └── v1/
+│   │   │       ├── router.py                  # API router aggregator
+│   │   │       └── endpoints/
+│   │   │           ├── simulation.py          # /simulation endpoints
+│   │   │           └── webhooks.py            # /webhooks endpoints
+│   │   ├── core/                              # Infrastructure singletons & configuration
+│   │   │   ├── config.py                      # Pydantic BaseSettings (.env loader)
+│   │   │   └── kafka.py                       # Kafka Producer client & dependency injection
+│   │   ├── schemas/                           # Pydantic domain models & contracts
+│   │   │   ├── events.py                      # WebhookPayload, EventEnvelope, Entity enums
+│   │   │   └── responses.py                   # API response models
+│   │   └── services/                          # Business logic & background workers
+│   │       ├── generator.py                   # Asyncio background event simulator loop
+│   │       └── mock_factory.py                # Faker mock CRM event generators
+│   └── tests/                                 # Automated Pytest suite
+│       ├── conftest.py                        # TestClient & mock Kafka fixtures
+│       ├── api/                               # API route tests (webhooks, simulation, health)
+│       └── unit/                              # Unit tests (schemas, config, mock generator)
+├── ARCHITECTURE.md                            # High-level architecture summary & links
 ├── Makefile                                   # CLI helper commands for container management
+├── pyproject.toml                             # Project metadata, dev dependencies & pytest configuration
 ├── README.md                                  # Repository overview & quickstart guide
 └── TODOS.md                                   # Backlog of architectural improvements
 ```

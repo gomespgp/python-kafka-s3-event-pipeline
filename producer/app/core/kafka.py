@@ -1,22 +1,23 @@
 import json
 import logging
-import os
+from typing import Any, Optional
 from confluent_kafka import Producer
+from app.core.config import settings
 
 logger = logging.getLogger("kafka_producer")
 logging.basicConfig(level=logging.INFO)
 
+
 class KafkaEventProducer:
     def __init__(self):
-        bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
         config = {
-            "bootstrap.servers": bootstrap_servers,
-            "client.id": "crm-producer-api",
-            "acks": "all",
-            "retries": 5
+            "bootstrap.servers": settings.KAFKA_BOOTSTRAP_SERVERS,
+            "client.id": settings.KAFKA_CLIENT_ID,
+            "acks": settings.KAFKA_ACKS,
+            "retries": settings.KAFKA_RETRIES,
         }
         self.producer = Producer(config)
-        logger.info(f"Kafka Producer initialized pointing to {bootstrap_servers}")
+        logger.info(f"Kafka Producer initialized pointing to {settings.KAFKA_BOOTSTRAP_SERVERS}")
 
     def _delivery_callback(self, err, msg):
         if err:
@@ -27,7 +28,7 @@ class KafkaEventProducer:
                 f"with key '{msg.key().decode('utf-8') if msg.key() else 'None'}'"
             )
 
-    def produce_event(self, topic: str, key: str, payload: dict) -> None:
+    def produce_event(self, topic: str, key: Optional[str], payload: dict[str, Any]) -> None:
         """Serializes and sends a record to Kafka asynchronously."""
         serialized_value = json.dumps(payload).encode("utf-8")
         serialized_key = key.encode("utf-8") if key else None
@@ -36,7 +37,7 @@ class KafkaEventProducer:
             topic=topic,
             key=serialized_key,
             value=serialized_value,
-            callback=self._delivery_callback
+            callback=self._delivery_callback,
         )
         # Serve delivery callbacks from previous requests
         self.producer.poll(0)
@@ -45,4 +46,10 @@ class KafkaEventProducer:
         """Forces buffered messages to be delivered to Kafka."""
         return self.producer.flush(timeout)
 
+
 kafka_producer = KafkaEventProducer()
+
+
+def get_kafka_producer() -> KafkaEventProducer:
+    """Dependency injector for FastAPI routes."""
+    return kafka_producer

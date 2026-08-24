@@ -1,4 +1,4 @@
-.PHONY: up down logs restart clean help
+.PHONY: up down logs restart clean build test help
 
 # Default target when just typing 'make'
 .DEFAULT_GOAL := help
@@ -24,3 +24,5 @@ clean: ## Stop services and delete all persistent volumes (Fresh Start)
 build: ## Build the docker-compose file
 	docker compose -f .docker/docker-compose.yaml up -d --build
 
+test: ## Run producer test suite with pytest
+	PYTHONDONTWRITEBYTECODE=1 pytest producer/tests -v
