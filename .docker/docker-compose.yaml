@@ -1,0 +1,106 @@
+name: python-kafka-s3-event-pipeline
+
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    env_file:
+      - ./kafka/.env
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
+    container_name: minio_data_lake
+    restart: always
+    command: server /data --console-address ":9001"
+    env_file:
+      - .env
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1
+    container_name: minio_init
+    env_file:
+      - .env
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb myminio/kafka-s3-events-sink --ignore-existing;
+      echo 'MinIO bucket kafka-s3-events-sink created successfully';
+      "
+
+  kafka-connect:
+    build:
+      context: ./kafka-connect
+      dockerfile: Dockerfile
+    image: custom-kafka-connect:latest
+    container_name: kafka-connect
+    ports:
+      - "8083:8083"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    env_file:
+      - ./kafka-connect/.env
+    volumes:
+      - ../kafka-connect/connectors:/etc/kafka-connect/connectors
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8083/connectors || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  kafka-connect-init:
+    image: alpine:3.19
+    container_name: kafka-connect-init
+    depends_on:
+      kafka-connect:
+        condition: service_healthy
+    volumes:
+      - ../kafka-connect/connectors:/connectors
+      - ./kafka-connect/init-connectors.sh:/init-connectors.sh
+    entrypoint: ["/bin/sh", "/init-connectors.sh"]
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: kafka-ui
+    ports:
+      - "8088:8080"
+    env_file:
+      - ./kafka-ui/.env
+    depends_on:
+      kafka:
+        condition: service_healthy
+      kafka-connect:
+        condition: service_healthy
+
+  producer:
+    build:
+      context: ..
+      dockerfile: .docker/producer/Dockerfile
+    container_name: event-producer
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./producer/.env
+    depends_on:
+      kafka:
+        condition: service_healthy
