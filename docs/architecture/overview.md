@@ -8,6 +8,11 @@ This document provides a high-level overview of the system topology, core infras
 
 The platform connects event ingestion, streaming message brokering, managed connector ETL, and local object storage into a cohesive real-time event pipeline:
 
+![Architecture Diagram](assets/architecture_diagram.png)
+
+<details>
+<summary><b>View Text Mermaid Flowchart</b></summary>
+
 ```mermaid
 flowchart LR
     subgraph Producers [Event Ingestion Layer]
@@ -38,6 +43,10 @@ flowchart LR
     KafkaConnect -->|"Poll Topics (crm-.*)"| Kafka
     KafkaConnect -->|"Time-Based S3 Sink"| MinIO
 ```
+
+</details>
+
+> 💡 *Visual diagram is generated with Diagrams-as-Code. See the [Diagram Generation Guide](../guides/generate-diagrams.md) to modify and regenerate.*
 
 ---
 

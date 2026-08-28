@@ -27,6 +27,7 @@ Exact configuration variables and API specifications.
 Practical how-to guides for running, testing, and troubleshooting.
 
 - **[Local Development Guide](guides/local-development.md)** — How to run via Makefile, develop locally with virtualenv, and test end-to-end.
+- **[Diagram Generation Guide](guides/generate-diagrams.md)** — How to generate architecture diagrams using `diagrams` (Diagrams as Code).
 - **[Troubleshooting Guide](guides/troubleshooting.md)** — Diagnosing Kafka Connect issues, buffer flush behavior, and connection troubleshooting.
 
 ---
@@ -39,4 +40,5 @@ Practical how-to guides for running, testing, and troubleshooting.
 | **[Broker & Connect Guide](architecture/kafka-broker-connect.md)** | Data Engineers | KRaft mode, partition keys, delivery callbacks, flush triggers |
 | **[Configuration Reference](reference/configuration.md)** | DevOps / SRE | Environment variables, ports, credentials, JSON parameters |
 | **[API Reference](reference/api-endpoints.md)** | Application Developers | Webhooks, request/response models, simulation control |
+| **[Diagram Guide](guides/generate-diagrams.md)** | Technical Writers & Devs | Generating architecture diagrams with Python `diagrams` |
 | **[Troubleshooting Guide](guides/troubleshooting.md)** | Operations | Debugging failed connectors, MinIO storage verification |

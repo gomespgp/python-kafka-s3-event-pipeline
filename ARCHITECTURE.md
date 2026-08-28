@@ -10,6 +10,11 @@ For exhaustive sub-component guides, refer to the [Documentation Hub](docs/READM
 
 The platform implements a real-time event-driven streaming architecture. Event producers (FastAPI REST API and async event simulator) stream JSON payload envelopes into an Apache Kafka cluster running in ZooKeeper-less KRaft mode. Kafka Connect consumes messages from dynamic CRM topics (`crm-.*`) and streams them into MinIO object storage in time-partitioned JSON format.
 
+![Architecture Diagram](docs/architecture/assets/architecture_diagram.png)
+
+<details>
+<summary><b>View Text Mermaid Flowchart</b></summary>
+
 ```mermaid
 flowchart LR
     subgraph Producers [Event Ingestion Layer]
@@ -40,6 +45,10 @@ flowchart LR
     KafkaConnect -->|"Poll Topics (crm-.*)"| Kafka
     KafkaConnect -->|"Time-Based S3 Sink"| MinIO
 ```
+
+</details>
+
+> 💡 *Visual diagram is generated with Diagrams-as-Code. See [Diagram Generation Guide](docs/guides/generate-diagrams.md) to modify and regenerate.*
 
 ---
 

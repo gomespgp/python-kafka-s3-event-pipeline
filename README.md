@@ -94,6 +94,7 @@ For comprehensive technical design, configurations, and developer guides, explor
 - 📋 **[Configuration Reference](docs/reference/configuration.md)** — Detailed breakdown of `.env` variables and connector JSON.
 - 🌐 **[API Reference](docs/reference/api-endpoints.md)** — Complete OpenAPI/cURL specification for all endpoints.
 - 🛠️ **[Local Development Guide](docs/guides/local-development.md)** — Makefile commands and local workflow.
+- 📊 **[Diagram Generation Guide](docs/guides/generate-diagrams.md)** — How to generate architecture diagrams using `diagrams`.
 - 🩺 **[Troubleshooting Guide](docs/guides/troubleshooting.md)** — Common connector, broker, and MinIO fixes.
 
 ---
