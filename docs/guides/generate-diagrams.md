@@ -92,21 +92,28 @@ except ImportError:
     sys.exit(1)
 
 graph_attr = {
-    "fontsize": "16",
+    "fontsize": "18",
+    "fontname": "Segoe UI Bold",
+    "fontcolor": "#1E293B",
     "bgcolor": "white",
     "pad": "0.6",
     "nodesep": "0.8",
     "ranksep": "1.4",
     "splines": "ortho",
+    "dpi": "300",
 }
 
 node_attr = {
-    "fontsize": "10",
+    "fontname": "Segoe UI Semibold",
+    "fontsize": "11",
+    "fontcolor": "#0F172A",
     "labelloc": "b",
 }
 
 edge_attr = {
-    "fontsize": "9",
+    "fontname": "Segoe UI Medium",
+    "fontsize": "10",
+    "fontcolor": "#334155",
     "color": "#334155",
 }
 
@@ -120,9 +127,9 @@ with Diagram(
     node_attr=node_attr,
     edge_attr=edge_attr,
 ):
-    users = Users("External Clients\n(Webhooks)")
+    users = Users("CRM Webhook Clients\n(External)")
 
-    with Cluster("1. Ingestion Layer (FastAPI Producer)"):
+    with Cluster("1. Event Ingestion Layer (FastAPI Producer)"):
         fastapi_app = FastAPI("FastAPI REST API\n(:8000)")
         simulator = Python("Simulator Worker\n(Async Faker)")
         producer_client = Python("confluent-kafka\n(Client / DI)")

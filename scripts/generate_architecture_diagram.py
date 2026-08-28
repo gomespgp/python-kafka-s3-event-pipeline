@@ -41,22 +41,29 @@ except ImportError:
     sys.exit(1)
 
 graph_attr = {
-    "fontsize": "16",
-    "bgcolor": "#ffffff",
-    "pad": "0.5",
-    "nodesep": "1",
-    "ranksep": "0.8",
-    "splines": "line",
+    "fontsize": "18",
+    "fontname": "Segoe UI Bold",
+    "fontcolor": "#1E293B",
+    "bgcolor": "white",
+    "pad": "0.6",
+    "nodesep": "0.8",
+    "ranksep": "1.4",
+    "splines": "lines",
+    "dpi": "300",
 }
 
 node_attr = {
-    "fontsize": "10",
+    "fontname": "Segoe UI Semibold",
+    "fontsize": "11",
+    "fontcolor": "#0F172A",
     "labelloc": "b",
 }
 
 edge_attr = {
-    "fontsize": "9",
-    "color": "#2D3748",
+    "fontname": "Segoe UI Medium",
+    "fontsize": "10",
+    "fontcolor": "#334155",
+    "color": "#334155",
 }
 
 with Diagram(
